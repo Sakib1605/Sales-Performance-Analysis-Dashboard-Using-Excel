@@ -15,7 +15,7 @@ Key goals included:
 
 ## **Screenshot of the Dashboard**
 
-![Sales Performance Analysis Dashboard](dashboard_screenshot.png)
+![Sales Performance Analysis Dashboard](dashboard screenshot.png)
 
 ---
 
