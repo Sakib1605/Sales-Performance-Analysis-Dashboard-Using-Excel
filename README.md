@@ -30,9 +30,6 @@ Key goals included:
     - Dates formatted consistently.
     - Numeric fields cleaned for accurate calculations.
   - Removed duplicates and null values.
-  - Created new calculated fields:
-    - **Average Sales Per Order**: `Total Sales / Total Orders`.
-    - **Order Contribution by Product Category**: `(Sales for Product Category / Total Sales) * 100`.
 
 ---
 
