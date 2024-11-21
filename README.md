@@ -102,23 +102,6 @@ To enhance usability, VBA was implemented to automate report generation.
 - Reports are formatted professionally with section headers and colorful headers.
 - Reports are exported as PDFs for easy sharing and distribution.
 
----
-
-## **Technical Calculations**
-
-1. **Average Sales Per Order**:
-   - Formula: `Total Sales / Total Orders`
-   - Purpose: To measure revenue generated per transaction.
-2. **Order Contribution by Product Category**:
-   - Formula: `(Sales for Product Category / Total Sales) * 100`
-   - Purpose: To determine each category’s contribution to overall sales.
-3. **Top 5 States by Orders**:
-   - Extracted by sorting order data by state and selecting the top 5 states based on `COUNT(Order ID)`.
-4. **Shipping Time Analysis**:
-   - Formula: `Shipping Date - Order Date`
-   - Purpose: To calculate average shipping time across regions and shipping modes.
-
----
 
 ## **Conclusion**
 
