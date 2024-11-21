@@ -1,4 +1,4 @@
-# **Sales Performance Analysis Dashboard: Project Report**
+# **Sales-Performance-Analysis-Dashboard-Using-Excel**
 Designed an interactive Excel dashboard to analyze sales trends, customer segmentation, product analytics, and geographic insights with time-based analysis for seasonal trends. Implemented VBA macros with event-driven programming to automate data updates, dynamic filtering, and report generation.
 ---
 
