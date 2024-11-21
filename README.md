@@ -13,6 +13,12 @@ Key goals included:
 
 ---
 
+## **Screenshot of the Dashboard**
+
+![Sales Performance Analysis Dashboard](dashboard_screenshot.png)
+
+---
+
 ## **Steps Taken**
 
 ### **1. Data Integration and Transformation**
