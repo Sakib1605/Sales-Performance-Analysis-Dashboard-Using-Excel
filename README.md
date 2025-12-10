@@ -39,7 +39,7 @@ SQL was used to clean and standardize all tables before analysis:
 
 ### 🧹 SQL Data Cleaning
 
-
+```sql
 -- Standardize date formats
 UPDATE orders
 SET 
@@ -61,7 +61,7 @@ WHERE customer_id IN (
     ) t
     WHERE rn > 1
 );
-
+```
 
 
 
