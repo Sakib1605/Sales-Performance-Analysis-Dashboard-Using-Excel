@@ -37,7 +37,7 @@ SQL was used to clean and standardize all tables before analysis:
 - standardize category & segment text fields
 - Ensure referential integrity across tables
 
-### 🧹 SQL Data Cleaning
+### SQL Data Cleaning
 
 ```sql
 -- Standardize date formats
@@ -62,13 +62,185 @@ WHERE customer_id IN (
     WHERE rn > 1
 );
 ```
+### Integrating the Datasets with SQL JOINs
+```sql
+CREATE VIEW unified_sales AS
+SELECT 
+    o.order_id,
+    o.order_date,
+    o.ship_date,
+    o.state,
+    o.ship_mode,
+    c.customer_id,
+    c.customer_name,
+    c.segment,
+    s.product_name,
+    s.category,
+    s.sub_category,
+    s.sales_amount,
+    s.quantity,
+    s.profit
+FROM sales s
+JOIN orders o 
+    ON s.order_id = o.order_id
+JOIN customers c 
+    ON o.customer_id = c.customer_id;
 
-
+```
 
 
 ---
 
-### **2. Dashboard Design**
+### **2. SQL Analytics (Answering Business Questions)**
+
+SQL queries were used to derive analytical insights.
+#### Business Question: How do monthly sales trend over time?
+
+```sql
+SELECT 
+    DATEFROMPARTS(YEAR(order_date), MONTH(order_date), 1) AS month_start,
+    SUM(sales_amount) AS total_sales
+FROM unified_sales
+GROUP BY DATEFROMPARTS(YEAR(order_date), MONTH(order_date), 1)
+ORDER BY month_start;
+```
+#### Interpretation: 
+This query identifies sales trends by month, showing peaks and dips across the year. The results reveal seasonal patterns, helping businesses forecast demand and optimize inventory and promotional planning.
+
+#### Business Question: How is each product category performing over time, and which categories show accelerating or declining sales momentum?
+
+```sql
+WITH category_monthly AS (
+    SELECT
+        DATEFROMPARTS(YEAR(order_date), MONTH(order_date), 1) AS month_start,
+        category,
+        SUM(sales_amount) AS monthly_sales
+    FROM unified_sales
+    GROUP BY 
+        DATEFROMPARTS(YEAR(order_date), MONTH(order_date), 1),
+        category
+),
+growth_calc AS (
+    SELECT
+        month_start,
+        category,
+        monthly_sales,
+        LAG(monthly_sales) OVER (
+            PARTITION BY category 
+            ORDER BY month_start
+        ) AS prev_month_sales
+    FROM category_monthly
+)
+SELECT
+    month_start,
+    category,
+    monthly_sales,
+    prev_month_sales,
+    (monthly_sales - prev_month_sales) AS sales_change,
+    CASE
+        WHEN prev_month_sales IS NULL OR prev_month_sales = 0 THEN NULL
+        ELSE (monthly_sales - prev_month_sales) * 1.0 / prev_month_sales
+    END AS growth_rate
+FROM growth_calc
+ORDER BY month_start, category;
+
+```
+#### Interpretation: 
+This analysis provides early-warning signals and growth insights for product planning:
+
+- Positive growth rate → category is gaining traction; consider increasing stock, marketing push, or premium pricing
+
+- Negative growth rate → early signs of decline; investigate causes (competition, seasonality, pricing issues)
+
+- Large month-over-month changes highlight categories experiencing rapid shifts in customer demand
+
+- Tracking categories over time helps leadership prioritize investments, forecast demand, and manage inventory risk
+
+
+
+
+#### Business Question: Which products show early signs of becoming future top performers?
+
+```sql
+WITH monthly_product_sales AS (
+    SELECT
+        DATEFROMPARTS(YEAR(order_date), MONTH(order_date), 1) AS month_start,
+        product_name,
+        SUM(sales_amount) AS total_sales
+    FROM unified_sales
+    GROUP BY DATEFROMPARTS(YEAR(order_date), MONTH(order_date), 1), product_name
+),
+growth_calc AS (
+    SELECT
+        product_name,
+        month_start,
+        total_sales,
+        LAG(total_sales) OVER (PARTITION BY product_name ORDER BY month_start) AS prev_sales
+    FROM monthly_product_sales
+)
+SELECT
+    product_name,
+    month_start,
+    total_sales,
+    prev_sales,
+    (total_sales - prev_sales) AS change_in_sales,
+    CASE 
+        WHEN prev_sales = 0 OR prev_sales IS NULL THEN NULL
+        ELSE (total_sales - prev_sales) * 1.0 / prev_sales
+    END AS growth_rate
+FROM growth_calc
+WHERE month_start >= DATEADD(month, -3, (SELECT MAX(month_start) FROM monthly_product_sales))
+ORDER BY growth_rate DESC;
+
+```
+#### Interpretation: 
+This identifies rising products based on recent growth trends:
+- Helps detect products that may become next quarter’s top sellers
+
+- Supports demand forecasting and stocking decisions
+
+- Allows early investment in products showing early momentum
+
+#### Business Question 3: Which geographic regions generate the highest order volume?
+
+```sql
+SELECT TOP 5 
+    state,
+    COUNT(order_id) AS total_orders
+FROM unified_sales
+GROUP BY state
+ORDER BY total_orders DESC;
+
+
+```
+#### Interpretation: 
+Highlighting top-performing states helps identify geographic demand clusters. These insights can be used for: Regional sales prioritization & Optimizing inventory distribution.
+
+#### Business Question 5: Which product categories generate the highest sales, and where should inventory be optimized?
+
+```sql
+SELECT 
+    category,
+    SUM(sales_amount) AS total_sales,
+    SUM(quantity) AS total_units_sold
+FROM unified_sales
+GROUP BY category
+ORDER BY total_sales DESC;
+
+```
+#### Interpretation: 
+This identifies which product categories drive revenue and volume. Businesses use this insight to:
+
+- Prioritize high-performing categories
+
+- Optimize stock levels
+
+- Plan category-specific promotions
+
+- Identify underperforming categories needing review
+
+
+### **3. Dashboard Design**
 
 The dashboard was created in Excel with a focus on interactivity, clarity, and ease of use.
 
