@@ -7,9 +7,9 @@ Designed an interactive Excel dashboard to analyze sales trends, customer segmen
 The objective of the **Sales Performance Analysis Dashboard** was to create a comprehensive, interactive, and automated solution for analyzing sales performance across multiple dimensions. This dashboard enables businesses to gain actionable insights by dynamically filtering data, visualizing key metrics, and generating automated reports based on user-defined filters. 
 
 Key goals included:
-- Integrating multiple datasets (**Customers**, **Orders**, and **Sales**) into a unified dataset for seamless analysis.
-- Designing an intuitive, interactive dashboard that provides insights into sales trends, customer segments, product performance, and shipping modes.
-- Implementing automation with VBA to automate data update and the generation of custom sales performance reports.
+- Integrate multiple datasets (Customers, Orders, and Sales) into a unified, analytics-ready dataset using SQL for efficient querying and scalable processing.
+- Design an intuitive Excel dashboard that offers dynamic insights into sales trends, customer segments, top-performing products, regional patterns, and shipping preferences.
+- Implement automation using VBA to streamline data updates, apply user-defined filters, and generate custom PDF reports without manual intervention.
 
 ---
 
@@ -29,13 +29,42 @@ Key goals included:
   - **Sales Dataset**: Provided transactional data like Product, Sales Amount, Quantity, and Profit.
 
 - **Data Cleaning and Preprocessing**:
-  - Used **XLOOKUP** to combine datasets into a single table:
-    - Customers matched with Orders using `Customer ID`.
-    - Orders linked to Sales using `Order ID`.
-  - Standardized columns:
-    - Dates formatted consistently.
-    - Numeric fields cleaned for accurate calculations.
-  - Removed duplicates and null values.
+ To ensure accuracy, scalability, and clean data structure, all raw datasets were first imported into a SQL database and processed through a structured data engineering workflow.
+SQL was used to clean and standardize all tables before analysis:
+
+- Remove duplicates
+- Fix date formats
+- standardize category & segment text fields
+- Ensure referential integrity across tables
+
+### 🧹 SQL Data Cleaning
+
+
+-- Standardize date formats
+UPDATE orders
+SET 
+    order_date = CONVERT(date, order_date),
+    ship_date  = CONVERT(date, ship_date);
+
+-- Remove duplicate customers
+DELETE FROM customers
+WHERE customer_id IN (
+    SELECT customer_id
+    FROM (
+        SELECT 
+            customer_id,
+            ROW_NUMBER() OVER (
+                PARTITION BY customer_id 
+                ORDER BY customer_name
+            ) AS rn
+        FROM customers
+    ) t
+    WHERE rn > 1
+);
+
+
+
+
 
 ---
 
